@@ -1,4 +1,4 @@
-# Yam — CTF & Forensics Cheatsheet Tool
+# yam — CTF & Forensics Cheatsheet Tool
 
 ## What it is
 yam is a small command-line helper that inspects a file (using `file` and `exiftool`) and prints a focused, practical cheatsheet of tools and commands to use for CTF / forensic analysis (images, PDFs, archives, PCAPs, media, text, etc.). It does **not** execute unknown binaries.
