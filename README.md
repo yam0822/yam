@@ -19,3 +19,6 @@ sudo mv yam /usr/local/bin
 ```bash
 chmod +x /usr/local/bin/yam
 ```
+
+## Disclaimer
+yam is intended for educational purposes and CTF / forensic analysis in controlled environments. Do not run unknown binaries on your main system; use a sandbox or VM. The author is not responsible for misuse.
