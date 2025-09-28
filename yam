@@ -1,0 +1,248 @@
+#!/usr/bin/env zsh
+# yam - full colorized targeted CTF / forensics cheatsheet (ANSI colors for Kali Linux)
+
+set -euo pipefail
+
+# ---- Colors (ANSI) ----
+RED="\033[31m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+CYAN="\033[36m"
+RESET="\033[0m"
+
+# ---- Helpers ----
+print_banner() {
+  local title="$1"
+  echo "\n${CYAN}=== $title ===${RESET}\n"
+}
+
+show_tool_list() {
+  local label="$1"
+  shift
+  local -a tools=( "$@" )
+  echo "${YELLOW}-- $label --${RESET}"
+  local installed=()
+  local missing=()
+  for t in "${tools[@]}"; do
+    if command -v "${t%%,*}" >/dev/null 2>&1; then
+      installed+=( "$t" )
+    else
+      missing+=( "$t" )
+    fi
+  done
+
+  if (( ${#installed[@]} )); then
+    echo "Present on PATH:"
+    for t in "${installed[@]}"; do
+      echo "  ${GREEN}✓${RESET} $t"
+    done
+  else
+    echo "Present on PATH: (none)"
+  fi
+
+  if (( ${#missing[@]} )); then
+    echo "Missing (recommended to install):"
+    for t in "${missing[@]}"; do
+      echo "  ${RED}✗${RESET} $t"
+    done
+  else
+    echo "Missing: (none)"
+  fi
+  echo
+}
+
+# ---- Cheat sheets ----
+cheat_executable() {
+  print_banner "Executable / Binary Analysis Cheatsheet"
+  echo "Use these tools for static + dynamic reverse-engineering and binary forensics."
+  show_tool_list "Recommended tools (executables)" \
+    ghidra gdb xxd checksec upx radare2 "cutter" objdump readelf strings strace ltrace
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - file <bin>"
+  echo " - strings -a -n 4 <bin>"
+  echo " - xxd -g1 -l 512 <bin>"
+  echo " - checksec --file=<bin>"
+  echo " - ghidra (GUI) / radare2 / Cutter"
+  echo " - gdb -q --args <bin> <args>"
+  echo " - objdump -d -M intel <bin>"
+  echo " - readelf -a <bin>"
+}
+
+cheat_pcap() {
+  print_banner "PCAP / Network Forensics Cheatsheet"
+  show_tool_list "Recommended tools (pcap)" \
+    wireshark tshark tcpdump scapy "python3,scapy" jq foremost "networkminer"
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - tshark -r <cap> -Y 'http' -T fields -e http.host -e http.request.uri"
+  echo " - tcpdump -r <cap> -nn -tttt"
+  echo " - strings <cap> | grep -i picoCTF"
+  echo " - foremost -i <cap> -o carved/"
+}
+
+cheat_pdf() {
+  print_banner "PDF / Document Forensics Cheatsheet"
+  show_tool_list "Recommended tools (pdf/doc)" \
+    pdfid.py pdf-parser.py mutool qpdf ripmime exiftool strings "oletools,olevba"
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - pdfid.py <doc.pdf>"
+  echo " - pdf-parser.py -s / -o <doc.pdf>"
+  echo " - exiftool <doc.pdf>"
+  echo " - strings <doc.pdf> | less"
+}
+
+cheat_image() {
+  print_banner "Image Forensics & Stego Cheatsheet"
+  show_tool_list "Recommended tools (image/stego)" \
+    exiftool identify binwalk zsteg steghide stegsolve foremost strings
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - exiftool -a -G1 -s <img>"
+  echo " - strings <img> | grep -i picoCTF"
+  echo " - binwalk -e <img>"
+}
+
+cheat_archive() {
+  print_banner "Archive / Compressed Cheatsheet"
+  show_tool_list "Recommended tools (archives)" \
+    unzip "7z,7za" tar unrar binwalk foremost zipinfo zip2john john fcrackzip
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - unzip -l <file>"
+  echo " - 7z l <file> / 7z x <file>"
+  echo " - tar -tf <file>"
+  echo " - unrar x <file>"
+  echo " - binwalk -e <file>"
+}
+
+cheat_media() {
+  print_banner "Audio / Video Forensics Cheatsheet"
+  show_tool_list "Recommended tools (media)" \
+    ffprobe mediainfo ffmpeg exiftool sox "sonic-visualiser" binwalk strings
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - ffprobe -show_format -show_streams <file>"
+  echo " - mediainfo <file>"
+  echo " - ffmpeg -i <file> -vf 'select=eq(pict_type\,I)' -vsync 0 frames/out%03d.png"
+  echo " - exiftool <file>"
+  echo " - strings <file> | grep -i picoCTF"
+}
+
+cheat_office() {
+  print_banner "Office / Macro Analysis Cheatsheet"
+  show_tool_list "Recommended tools (office/macros)" \
+    oletools olevba oledump.py ripmime binwalk 7z strings exiftool
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - olevba <doc>"
+  echo " - oledump.py <doc>"
+  echo " - exiftool <doc>"
+  echo " - strings <doc> | less"
+}
+
+cheat_text() {
+  print_banner "Text / Encodings Cheatsheet"
+  show_tool_list "Recommended tools (text/encodings)" \
+    grep sed awk xxd base64 tr "cyberchef"
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - head -n 200 <file>"
+  echo " - grep -a -E -n 'picoCTF|FLAG|CTF' <file>"
+  echo " - base64 --decode / xxd -r"
+}
+
+cheat_compressed() {
+  print_banner "Compressed / Gzip Cheatsheet"
+  show_tool_list "Recommended tools (compressed)" \
+    gzip zcat xzcat bzip2 "7z,7za" binwalk foremost strings
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - zcat <file> | strings | grep -i picoCTF"
+  echo " - gunzip -c <file> > out"
+  echo " - 7z x <file>"
+}
+
+cheat_unknown() {
+  print_banner "Generic / Unknown File Cheatsheet"
+  show_tool_list "Recommended generic tools" \
+    file exiftool strings xxd binwalk foremost grep
+  echo "${YELLOW}Quick commands:${RESET}"
+  echo " - file <file>"
+  echo " - exiftool <file>"
+  echo " - strings -a -n 4 <file>"
+  echo " - xxd -g1 -l 512 <file>"
+  echo " - binwalk --signature <file>"
+  echo " - foremost -i <file> -o carved/"
+  echo " - grep -a -i -n 'picoCTF' <file>"
+}
+
+# ---- Main ----
+if (( $# != 1 )); then
+  echo "Usage: yam <file>"
+  exit 1
+fi
+
+TARGET="$1"
+
+if [[ ! -e "$TARGET" ]]; then
+  echo "${RED}Target not found: $TARGET${RESET}"
+  exit 1
+fi
+
+# Check mandatory tools
+for r in file exiftool; do
+  if ! command -v $r >/dev/null 2>&1; then
+    echo "${RED}Missing required tool: $r${RESET}"
+    exit 1
+  fi
+done
+
+file_verbose="$(file -b -- "$TARGET" 2>/dev/null || true)"
+exif_out="$(exiftool -s -G1 "$TARGET" 2>/dev/null || true)"
+
+print_banner "yam: targeted forensics cheatsheet"
+echo "Target: $TARGET"
+echo "file (verbose): $file_verbose"
+if [[ -n "$exif_out" ]]; then
+  echo "\nexiftool (sample):"
+  echo "$exif_out" | head -n 12
+else
+  echo "\nexiftool returned no metadata (or none recognized)."
+fi
+echo
+
+lc_file_verbose="${file_verbose:l}"
+lc_exif="${exif_out:l}"
+
+# Heuristic checks
+if [[ "$lc_file_verbose" =~ "pcap" || "$lc_file_verbose" =~ "packet capture" ]]; then
+  cheat_pcap; exit 0
+fi
+
+if [[ "$lc_file_verbose" =~ "pdf" ]]; then
+  cheat_pdf; exit 0
+fi
+
+if [[ "$lc_file_verbose" =~ "pe32" || "$lc_file_verbose" =~ "elf" || "$lc_file_verbose" =~ "executable" || "$lc_file_verbose" =~ "mach-o" ]]; then
+  cheat_executable; exit 0
+fi
+
+if [[ "$lc_file_verbose" =~ "jpeg" || "$lc_file_verbose" =~ "png" || "$lc_file_verbose" =~ "tiff" || "$lc_file_verbose" =~ "gif image" || "$lc_exif" =~ "exif" ]]; then
+  cheat_image; exit 0
+fi
+
+if [[ "$lc_file_verbose" =~ "zip" || "$lc_file_verbose" =~ "rar" || "$lc_file_verbose" =~ "7-zip" || "$lc_file_verbose" =~ "tar" ]]; then
+  cheat_archive; exit 0
+fi
+
+if [[ "$lc_file_verbose" =~ "mp3" || "$lc_file_verbose" =~ "wav" || "$lc_file_verbose" =~ "ogg" || "$lc_file_verbose" =~ "mp4" ]]; then
+  cheat_media; exit 0
+fi
+
+if [[ "$lc_file_verbose" =~ "microsoft office" || "$lc_file_verbose" =~ "compound document" ]]; then
+  cheat_office; exit 0
+fi
+
+if [[ "$lc_file_verbose" =~ "text" || "$lc_file_verbose" =~ "ascii" || "$lc_file_verbose" =~ "utf-8" ]]; then
+  cheat_text; exit 0
+fi
+
+if [[ "$lc_file_verbose" =~ "gzip" || "$lc_file_verbose" =~ "bzip2" || "$lc_file_verbose" =~ "xz" ]]; then
+  cheat_compressed; exit 0
+fi
+
+cheat_unknown
+exit 0
