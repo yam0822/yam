@@ -3,6 +3,7 @@
 ## What it is
 yam is a small command-line helper that inspects a file (using `file` and `exiftool`) and prints a focused, practical cheatsheet of tools and commands to use for CTF / forensic analysis (images, PDFs, archives, PCAPs, media, text, etc.). It does **not** execute unknown binaries.
 
+
 ## How to install
 
 
@@ -15,6 +16,8 @@ wget -O yam_installer.sh https://raw.githubusercontent.com/yam0822/yam/main/yam_
 chmod +x yam_installer.sh
 ./yam_installer.sh
 ```
+
+
 
 ### Manual Install
 
@@ -33,6 +36,8 @@ sudo mv yam /usr/local/bin
 ```bash
 chmod +x /usr/local/bin/yam
 ```
+
+
 
 ## Example Usage
 
