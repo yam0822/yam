@@ -171,7 +171,7 @@ cheat_unknown() {
 
 # ---- Main ----
 if (( $# != 1 )); then
-  echo "Usage: yam <file>"
+  echo "Example Usage: yam <file>"
   exit 1
 fi
 
