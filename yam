@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 # yam - full colorized targeted CTF / forensics cheatsheet (ANSI colors for Kali Linux)
+# directory busting mode
 
 set -euo pipefail
 
@@ -51,18 +52,58 @@ show_tool_list() {
   echo
 }
 
-# ---- Cheat sheets ----
+# ---- Gobuster installer instructions ----
+gobuster_instructions() {
+  echo "\n${RED}[!] gobuster is not installed.${RESET}"
+  echo "${YELLOW}Install gobuster in Kali Linux with:${RESET}"
+  echo "  sudo apt update && sudo apt install gobuster"
+  echo
+}
+
+# =====================================================================
+#                            BUST MODE
+# =====================================================================
+if [[ "${1:-}" == "bust" ]]; then
+  if [[ $# -ne 2 ]]; then
+    echo "${RED}Usage: yam bust <url>${RESET}"
+    exit 1
+  fi
+
+  URL="$2"
+
+  # Check for gobuster
+  if ! command -v gobuster >/dev/null 2>&1; then
+    gobuster_instructions
+    exit 1
+  fi
+
+  print_banner "Gobuster Directory Scan"
+  echo "Target URL: ${GREEN}$URL${RESET}"
+  echo "Wordlist:   ${YELLOW}/usr/share/seclists/Discovery/Web-Content/big.txt${RESET}"
+  echo
+
+  gobuster dir -u "$URL" \
+    -w /usr/share/seclists/Discovery/Web-Content/big.txt \
+    -b 404
+
+  exit 0
+fi
+
+# =====================================================================
+#                            CHEAT SHEETS
+# =====================================================================
+
 cheat_executable() {
   print_banner "Executable / Binary Analysis Cheatsheet"
-  echo "Use these tools for static + dynamic reverse-engineering and binary forensics."
-  show_tool_list "Recommended tools (executables)" \
-    ghidra gdb xxd checksec upx radare2 "cutter" objdump readelf strings strace ltrace
+  echo "Static & dynamic reverse engineering tools"
+  show_tool_list "Executables" \
+    ghidra gdb xxd checksec radare2 objdump readelf strings strace ltrace
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - file <bin>"
   echo " - strings -a -n 4 <bin>"
   echo " - xxd -g1 -l 512 <bin>"
   echo " - checksec --file=<bin>"
-  echo " - ghidra (GUI) / radare2 / Cutter"
+  echo " - ghidra (GUI) / radare2"
   echo " - gdb -q --args <bin> <args>"
   echo " - objdump -d -M intel <bin>"
   echo " - readelf -a <bin>"
@@ -70,8 +111,8 @@ cheat_executable() {
 
 cheat_pcap() {
   print_banner "PCAP / Network Forensics Cheatsheet"
-  show_tool_list "Recommended tools (pcap)" \
-    wireshark tshark tcpdump scapy "python3,scapy" jq foremost "networkminer"
+  show_tool_list "PCAP / Network" \
+    wireshark tshark tcpdump scapy jq foremost
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - tshark -r <cap> -Y 'http' -T fields -e http.host -e http.request.uri"
   echo " - tcpdump -r <cap> -nn -tttt"
@@ -81,8 +122,8 @@ cheat_pcap() {
 
 cheat_pdf() {
   print_banner "PDF / Document Forensics Cheatsheet"
-  show_tool_list "Recommended tools (pdf/doc)" \
-    pdfid.py pdf-parser.py mutool qpdf ripmime exiftool strings "oletools,olevba"
+  show_tool_list "PDF / Docs" \
+    pdfid.py pdf-parser.py mutool qpdf ripmime exiftool strings
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - pdfid.py <doc.pdf>"
   echo " - pdf-parser.py -s / -o <doc.pdf>"
@@ -91,9 +132,9 @@ cheat_pdf() {
 }
 
 cheat_image() {
-  print_banner "Image Forensics & Stego Cheatsheet"
-  show_tool_list "Recommended tools (image/stego)" \
-    exiftool identify binwalk zsteg steghide stegsolve foremost strings
+  print_banner "Image / Stego Cheatsheet"
+  show_tool_list "Images / Stego" \
+    exiftool identify binwalk zsteg steghide stegsolve
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - exiftool -a -G1 -s <img>"
   echo " - strings <img> | grep -i picoCTF"
@@ -102,8 +143,8 @@ cheat_image() {
 
 cheat_archive() {
   print_banner "Archive / Compressed Cheatsheet"
-  show_tool_list "Recommended tools (archives)" \
-    unzip "7z,7za" tar unrar binwalk foremost zipinfo zip2john john fcrackzip
+  show_tool_list "Archives" \
+    unzip 7z tar unrar binwalk foremost
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - unzip -l <file>"
   echo " - 7z l <file> / 7z x <file>"
@@ -113,9 +154,9 @@ cheat_archive() {
 }
 
 cheat_media() {
-  print_banner "Audio / Video Forensics Cheatsheet"
-  show_tool_list "Recommended tools (media)" \
-    ffprobe mediainfo ffmpeg exiftool sox "sonic-visualiser" binwalk strings
+  print_banner "Audio / Video Cheatsheet"
+  show_tool_list "Media" \
+    ffprobe mediainfo ffmpeg exiftool sox
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - ffprobe -show_format -show_streams <file>"
   echo " - mediainfo <file>"
@@ -126,7 +167,7 @@ cheat_media() {
 
 cheat_office() {
   print_banner "Office / Macro Analysis Cheatsheet"
-  show_tool_list "Recommended tools (office/macros)" \
+  show_tool_list "Office / Macros" \
     oletools olevba oledump.py ripmime binwalk 7z strings exiftool
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - olevba <doc>"
@@ -137,8 +178,8 @@ cheat_office() {
 
 cheat_text() {
   print_banner "Text / Encodings Cheatsheet"
-  show_tool_list "Recommended tools (text/encodings)" \
-    grep sed awk xxd base64 tr "cyberchef"
+  show_tool_list "Text / Encodings" \
+    grep sed awk xxd base64 tr
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - head -n 200 <file>"
   echo " - grep -a -E -n 'picoCTF|FLAG|CTF' <file>"
@@ -147,8 +188,8 @@ cheat_text() {
 
 cheat_compressed() {
   print_banner "Compressed / Gzip Cheatsheet"
-  show_tool_list "Recommended tools (compressed)" \
-    gzip zcat xzcat bzip2 "7z,7za" binwalk foremost strings
+  show_tool_list "Compressed" \
+    gzip zcat xzcat bzip2 7z binwalk foremost strings
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - zcat <file> | strings | grep -i picoCTF"
   echo " - gunzip -c <file> > out"
@@ -157,7 +198,7 @@ cheat_compressed() {
 
 cheat_unknown() {
   print_banner "Generic / Unknown File Cheatsheet"
-  show_tool_list "Recommended generic tools" \
+  show_tool_list "Generic Tools" \
     file exiftool strings xxd binwalk foremost grep
   echo "${YELLOW}Quick commands:${RESET}"
   echo " - file <file>"
@@ -169,9 +210,12 @@ cheat_unknown() {
   echo " - grep -a -i -n 'picoCTF' <file>"
 }
 
-# ---- Main ----
+# =====================================================================
+#                           MAIN FILE MODE
+# =====================================================================
 if (( $# != 1 )); then
-  echo "Usage: yam <file>"
+  echo "Example Usage: yam <file>"
+  echo "               yam bust <url>"
   exit 1
 fi
 
