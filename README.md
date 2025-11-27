@@ -3,6 +3,9 @@
 ## What it is
 yam is a small command-line helper that inspects a file (using `file` and `exiftool`) and prints a focused, practical cheatsheet of tools and commands to use for CTF / forensic analysis (images, PDFs, archives, PCAPs, media, text, etc.). It does **not** execute unknown binaries.
 
+### NEW
+yam also includes a directory bust mode using gobuster
+
 
 ## How to install
 
@@ -47,6 +50,13 @@ Run `yam` with a target file to get a targeted cheatsheet:
 yam physics-checker
 ```
 ![](example-usage.png)
+
+Run `yam` with a target url to bust directories:
+
+```bash
+yam bust forest.com
+```
+
 
 ## Disclaimer
 yam is intended for educational purposes and CTF / forensic analysis in controlled environments. Do not run unknown binaries on your main system; use a sandbox or VM. The author is not responsible for misuse.
